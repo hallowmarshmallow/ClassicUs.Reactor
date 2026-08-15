@@ -20,7 +20,9 @@ namespace ClassicUs.Manactor
         }
     }
 
-    [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnPlayerJoined))]
+    // OnPlayerJoined is protected in newer game versions, so it is referenced by
+    // string name rather than nameof() to keep the patch compiling across versions.
+    [HarmonyPatch(typeof(AmongUsClient), "OnPlayerJoined")]
     internal static class AmongUsClient_OnPlayerJoined_Patch
     {
         private static void Postfix(AmongUsClient __instance, ClientData data)
@@ -33,7 +35,7 @@ namespace ClassicUs.Manactor
         }
     }
 
-    [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnPlayerLeft))]
+    [HarmonyPatch(typeof(AmongUsClient), "OnPlayerLeft")]
     internal static class AmongUsClient_OnPlayerLeft_Patch
     {
         private static void Postfix(ClientData data, DisconnectReasons reason)
@@ -110,7 +112,7 @@ namespace ClassicUs.Manactor
         }
     }
 
-    [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnGameJoined))]
+    [HarmonyPatch(typeof(AmongUsClient), "OnGameJoined")]
     internal static class AmongUsClient_OnGameJoined_Patch
     {
         private static void Postfix(AmongUsClient __instance)
@@ -122,17 +124,24 @@ namespace ClassicUs.Manactor
         }
     }
 
-    [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.CoBegin))]
-    internal static class IntroCutscene_CoBegin_Patch
+    // Note: OnGameStarted was previously fired from IntroCutscene.CoBegin, which is a
+    // coroutine (IEnumerator) entry point. Patching coroutine entry points is known to
+    // segfault during Harmony detour installation on Linux IL2CPP (PAL_SEHException at
+    // launch). HudManager.Start is a plain void MonoBehaviour callback that fires at the
+    // same logical moment (round start) and is safe to detour.
+    [HarmonyPatch(typeof(HudManager), nameof(HudManager.Start))]
+    internal static class HudManager_Start_GameStarted_Patch
     {
-        private static void Prefix()
+        private static void Postfix()
         {
             try { ManactorAPI.FireGameStarted(); }
             catch (Exception e) { ManactorPlugin.Log.LogError("OnGameStarted event: " + e); }
         }
     }
 
-    [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Start))]
+    // MeetingHud.Start is private in newer game versions, so it is referenced by string
+    // name. It is the all-client meeting hook (MeetingHud.ServerStart is host-only).
+    [HarmonyPatch(typeof(MeetingHud), "Start")]
     internal static class MeetingHud_Start_Patch
     {
         private static void Postfix()
