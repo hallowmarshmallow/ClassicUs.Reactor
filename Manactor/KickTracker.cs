@@ -26,7 +26,8 @@ namespace ClassicUs.Manactor
             int? clientId = FindClientId(playerId);
             if (!clientId.HasValue) return;
             _pendingClients.Remove(clientId.Value);
-            if (!compatible) Kick(clientId.Value, $"incompatible client ({reason})");
+            if (!compatible && ShouldKick())
+                Kick(clientId.Value, $"incompatible client ({reason})");
         }
 
         public static void CheckPending()
@@ -41,7 +42,10 @@ namespace ClassicUs.Manactor
             foreach (var clientId in expired)
             {
                 _pendingClients.Remove(clientId);
-                Kick(clientId, "missing Manactor handshake");
+                if (ShouldKick())
+                    Kick(clientId, "missing Manactor handshake");
+                else
+                    ManactorPlugin.Log.LogInfo($"[Handshake] Client {clientId} has no Manactor; allowing join (compatibility enforcement disabled).");
             }
         }
 
@@ -54,6 +58,9 @@ namespace ClassicUs.Manactor
                     return player.OwnerId;
             return null;
         }
+
+        private static bool ShouldKick() =>
+            ManactorPlugin.EnforceCompatibility?.Value == true;
 
         private static void Kick(int clientId, string reason)
         {

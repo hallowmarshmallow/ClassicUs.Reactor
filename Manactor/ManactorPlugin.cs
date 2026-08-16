@@ -1,5 +1,6 @@
 using System;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
@@ -13,6 +14,14 @@ namespace ClassicUs.Manactor
         public const string Version = "1.1.0";
 
         public static ManualLogSource Log;
+
+        /// <summary>
+        /// When true, the host kicks players who never send a Manactor handshake
+        /// (unmodded/vanilla clients) or whose handshake is incompatible, after the
+        /// grace period. Leave false (default) for host-only mods so vanilla clients
+        /// can join a modded lobby.
+        /// </summary>
+        public static ConfigEntry<bool> EnforceCompatibility { get; private set; }
 
         /// <summary>
         /// All patch types from Patches.cs, in the order they should be applied.
@@ -48,6 +57,10 @@ namespace ClassicUs.Manactor
         public override void Load()
         {
             Log = base.Log;
+
+            EnforceCompatibility = Config.Bind(
+                "Handshake", "EnforceCompatibility", false,
+                "Kick players who are missing Manactor or have a mismatched mod set after the handshake grace period. Leave false for host-only mods so vanilla/unmodded clients can join.");
 
             var harmony = new Harmony(Guid);
             int applied = 0;
