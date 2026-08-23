@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName>ClassicUs.Manactor</AssemblyName>
-    <RootNamespace>ClassicUs.Manactor</RootNamespace>
+    <AssemblyName>ClassicUs.Reactor</AssemblyName>
+    <RootNamespace>ClassicUs.Reactor</RootNamespace>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>disable</Nullable>
@@ -11,7 +11,7 @@
     <NoWarn>CS0626;CS0649;CS8632;CS0108</NoWarn>
 
     <Version>1.1.0</Version>
-    <PackageId>ClassicUs.Manactor</PackageId>
+    <PackageId>ClassicUs.Reactor</PackageId>
     <Authors>Manu</Authors>
     <Description>Networking framework for Classic Us (Among Us) BepInEx mods. Provides RPC helpers, lobby mod tracking, and unmodded lobby detection.</Description>
     <PackageTags>among-us classic-us bepinex mod networking</PackageTags>

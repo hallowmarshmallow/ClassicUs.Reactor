@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace ClassicUs.Manactor
+namespace ClassicUs.Reactor
 {
     internal static class SettingsRowAllocator
     {

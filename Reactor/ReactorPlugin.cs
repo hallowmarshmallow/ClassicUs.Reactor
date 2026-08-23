@@ -5,18 +5,18 @@ using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 
-namespace ClassicUs.Manactor
+namespace ClassicUs.Reactor
 {
-    [BepInPlugin(Guid, "Manactor", Version)]
-    public class ManactorPlugin : BasePlugin
+    [BepInPlugin(Guid, "Reactor", Version)]
+    public class ReactorPlugin : BasePlugin
     {
-        public const string Guid = "classicus.manactor";
+        public const string Guid = "classicus.reactor";
         public const string Version = "1.1.0";
 
         public static ManualLogSource Log;
 
         /// <summary>
-        /// When true, the host kicks players who never send a Manactor handshake
+        /// When true, the host kicks players who never send a Reactor handshake
         /// (unmodded/vanilla clients) or whose handshake is incompatible, after the
         /// grace period. Leave false (default) for host-only mods so vanilla clients
         /// can join a modded lobby.
@@ -60,7 +60,7 @@ namespace ClassicUs.Manactor
 
             EnforceCompatibility = Config.Bind(
                 "Handshake", "EnforceCompatibility", false,
-                "Kick players who are missing Manactor or have a mismatched mod set after the handshake grace period. Leave false for host-only mods so vanilla/unmodded clients can join.");
+                "Kick players who are missing Reactor or have a mismatched mod set after the handshake grace period. Leave false for host-only mods so vanilla/unmodded clients can join.");
 
             var harmony = new Harmony(Guid);
             int applied = 0;
@@ -75,14 +75,14 @@ namespace ClassicUs.Manactor
             }
 
             if (skipped > 0)
-                Log.LogWarning($"Manactor: {skipped} patch(es) skipped (see warnings above). " +
+                Log.LogWarning($"Reactor: {skipped} patch(es) skipped (see warnings above). " +
                                $"{applied}/{PatchTypes.Length} patches active.");
             else
-                Log.LogInfo($"Manactor: all {applied} patches applied.");
+                Log.LogInfo($"Reactor: all {applied} patches applied.");
 
-            ManactorAPI.RegisterRpcMethods(typeof(CustomKillManager));
+            ReactorAPI.RegisterRpcMethods(typeof(CustomKillManager));
 
-            Log.LogInfo("Manactor loaded.");
+            Log.LogInfo("Reactor loaded.");
         }
 
         /// <summary>

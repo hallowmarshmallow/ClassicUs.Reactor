@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using Hazel;
 
-namespace ClassicUs.Manactor
+namespace ClassicUs.Reactor
 {
-    public static class ManactorAPI
+    public static class ReactorAPI
     {
         private static readonly List<(string mod, string version)> _localMods = new();
 
@@ -18,7 +18,7 @@ namespace ClassicUs.Manactor
         {
             _localMods.RemoveAll(m => m.mod == modName);
             _localMods.Add((modName, version));
-            ManactorPlugin.Log.LogInfo($"Registered mod: {modName} v{version}");
+            ReactorPlugin.Log.LogInfo($"Registered mod: {modName} v{version}");
             NetworkManager.SendHandshake();
         }
 
@@ -59,16 +59,16 @@ namespace ClassicUs.Manactor
             SettingsRowAllocator.ReserveRows(menuInstanceId, count);
 
         public static void RegisterRpcMethods(object target) =>
-            ManactorRpc.RegisterMethods(target);
+            ReactorRpc.RegisterMethods(target);
 
         public static void RegisterRpcMethods(Type type) =>
-            ManactorRpc.RegisterMethods(type);
+            ReactorRpc.RegisterMethods(type);
 
         public static void SendRpcMethod(byte callId, params object[] args) =>
-            ManactorRpc.Send(callId, args);
+            ReactorRpc.Send(callId, args);
 
         public static void SendRpcMethod(string key, params object[] args) =>
-            ManactorRpc.Send(key, args);
+            ReactorRpc.Send(key, args);
 
         public static void KillPlayer(PlayerControl killer, PlayerControl target, CustomKillOptions options = null) =>
             CustomKillManager.Kill(killer, target, options);

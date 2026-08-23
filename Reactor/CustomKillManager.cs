@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace ClassicUs.Manactor
+namespace ClassicUs.Reactor
 {
     public sealed class CustomKillOptions
     {
@@ -14,8 +14,8 @@ namespace ClassicUs.Manactor
 
     public static class CustomKillManager
     {
-        private const string RpcRequestKey = "classicus.manactor.RequestCustomKill";
-        private const string RpcConfirmKey = "classicus.manactor.ConfirmCustomKill";
+        private const string RpcRequestKey = "classicus.reactor.RequestCustomKill";
+        private const string RpcConfirmKey = "classicus.reactor.ConfirmCustomKill";
 
         public static void Kill(PlayerControl killer, PlayerControl target, CustomKillOptions options = null)
         {
@@ -28,17 +28,17 @@ namespace ClassicUs.Manactor
             if (client != null && client.AmHost)
             {
                 PerformKill(killer, target, options);
-                ManactorAPI.SendRpcMethod(RpcConfirmKey, killer.Data.PlayerId, target.Data.PlayerId,
+                ReactorAPI.SendRpcMethod(RpcConfirmKey, killer.Data.PlayerId, target.Data.PlayerId,
                     options.CreateDeadBody, options.TeleportKiller, options.PlayKillSound, options.ShowKillAnimation);
             }
             else
             {
-                ManactorAPI.SendRpcMethod(RpcRequestKey, killer.Data.PlayerId, target.Data.PlayerId,
+                ReactorAPI.SendRpcMethod(RpcRequestKey, killer.Data.PlayerId, target.Data.PlayerId,
                     options.CreateDeadBody, options.TeleportKiller, options.PlayKillSound, options.ShowKillAnimation);
             }
         }
 
-        [ManactorRpc(RpcRequestKey)]
+        [ReactorRpc(RpcRequestKey)]
         private static void OnRequestCustomKill(byte senderId, byte killerId, byte targetId, bool createDeadBody, bool teleportKiller, bool playKillSound, bool showKillAnimation)
         {
             var client = AmongUsClient.Instance;
@@ -57,10 +57,10 @@ namespace ClassicUs.Manactor
             };
 
             PerformKill(killer, target, options);
-            ManactorAPI.SendRpcMethod(RpcConfirmKey, killerId, targetId, createDeadBody, teleportKiller, playKillSound, showKillAnimation);
+            ReactorAPI.SendRpcMethod(RpcConfirmKey, killerId, targetId, createDeadBody, teleportKiller, playKillSound, showKillAnimation);
         }
 
-        [ManactorRpc(RpcConfirmKey)]
+        [ReactorRpc(RpcConfirmKey)]
         private static void OnConfirmCustomKill(byte senderId, byte killerId, byte targetId, bool createDeadBody, bool teleportKiller, bool playKillSound, bool showKillAnimation)
         {
             var client = AmongUsClient.Instance;
@@ -94,7 +94,7 @@ namespace ClassicUs.Manactor
                 if (options.ShowKillAnimation && target.AmOwner)
                 {
                     try { HudManager.Instance?.KillOverlay?.ShowKillAnimation(killer.Data, target.Data); }
-                    catch (Exception e) { ManactorPlugin.Log.LogError("CustomKillManager.ShowKillAnimation failed: " + e); }
+                    catch (Exception e) { ReactorPlugin.Log.LogError("CustomKillManager.ShowKillAnimation failed: " + e); }
                 }
 
                 target.gameObject.layer = LayerMask.NameToLayer("Ghost");
@@ -116,7 +116,7 @@ namespace ClassicUs.Manactor
             }
             catch (Exception e)
             {
-                ManactorPlugin.Log.LogError("CustomKillManager.PerformKill failed: " + e);
+                ReactorPlugin.Log.LogError("CustomKillManager.PerformKill failed: " + e);
             }
         }
 
@@ -135,7 +135,7 @@ namespace ClassicUs.Manactor
 
             if (anim == null)
             {
-                ManactorPlugin.Log.LogWarning("CustomKillManager.SpawnDeadBody: no KillAnimation with a bodyPrefab found on killer.KillAnimations, skipping dead body.");
+                ReactorPlugin.Log.LogWarning("CustomKillManager.SpawnDeadBody: no KillAnimation with a bodyPrefab found on killer.KillAnimations, skipping dead body.");
                 return;
             }
 
@@ -145,7 +145,7 @@ namespace ClassicUs.Manactor
             if (body.MyRend != null)
             {
                 try { target.SetPlayerMaterialColors(body.MyRend); }
-                catch (Exception e) { ManactorPlugin.Log.LogError("CustomKillManager.SpawnDeadBody color failed: " + e); }
+                catch (Exception e) { ReactorPlugin.Log.LogError("CustomKillManager.SpawnDeadBody color failed: " + e); }
             }
 
             Vector3 pos = target.transform.position + anim.BodyOffset;

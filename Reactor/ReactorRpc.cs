@@ -3,27 +3,27 @@ using System.Collections.Generic;
 using System.Reflection;
 using Hazel;
 
-namespace ClassicUs.Manactor
+namespace ClassicUs.Reactor
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public sealed class ManactorRpcAttribute : Attribute
+    public sealed class ReactorRpcAttribute : Attribute
     {
         public byte? CallId { get; }
         public string Key { get; }
 
-        public ManactorRpcAttribute(byte callId)
+        public ReactorRpcAttribute(byte callId)
         {
             CallId = callId;
         }
 
-        public ManactorRpcAttribute(string key)
+        public ReactorRpcAttribute(string key)
         {
             Key = key;
             RpcIdAllocator.Reserve(key);
         }
     }
 
-    public static class ManactorRpc
+    public static class ReactorRpc
     {
         private static readonly List<Action> _pendingRegistrations = new();
         private static bool _flushed;
@@ -40,19 +40,19 @@ namespace ClassicUs.Manactor
         {
             foreach (var method in type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
             {
-                var attr = method.GetCustomAttribute<ManactorRpcAttribute>();
+                var attr = method.GetCustomAttribute<ReactorRpcAttribute>();
                 if (attr == null) continue;
 
                 if (!method.IsStatic && target == null)
                 {
-                    ManactorPlugin.Log.LogError($"[ManactorRpc] {type.Name}.{method.Name} is an instance method but no instance was provided, skipping.");
+                    ReactorPlugin.Log.LogError($"[ReactorRpc] {type.Name}.{method.Name} is an instance method but no instance was provided, skipping.");
                     continue;
                 }
 
                 var parameters = method.GetParameters();
                 if (parameters.Length == 0 || parameters[0].ParameterType != typeof(byte))
                 {
-                    ManactorPlugin.Log.LogError($"[ManactorRpc] {type.Name}.{method.Name} needs a leading byte senderId parameter, skipping.");
+                    ReactorPlugin.Log.LogError($"[ReactorRpc] {type.Name}.{method.Name} needs a leading byte senderId parameter, skipping.");
                     continue;
                 }
 
@@ -111,7 +111,7 @@ namespace ClassicUs.Manactor
             if (type == typeof(int)) return reader.ReadInt32();
             if (type == typeof(float)) return reader.ReadSingle();
             if (type == typeof(string)) return reader.ReadString();
-            throw new NotSupportedException($"[ManactorRpc] Unsupported parameter type: {type}");
+            throw new NotSupportedException($"[ReactorRpc] Unsupported parameter type: {type}");
         }
 
         private static void WriteValue(MessageWriter writer, object value)
@@ -123,7 +123,7 @@ namespace ClassicUs.Manactor
                 case int i: writer.Write(i); break;
                 case float f: writer.Write(f); break;
                 case string s: writer.Write(s); break;
-                default: throw new NotSupportedException($"[ManactorRpc] Unsupported argument type: {value?.GetType()}");
+                default: throw new NotSupportedException($"[ReactorRpc] Unsupported argument type: {value?.GetType()}");
             }
         }
     }

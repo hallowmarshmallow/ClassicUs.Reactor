@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ClassicUs.Manactor
+namespace ClassicUs.Reactor
 {
     internal static class LobbyTracker
     {

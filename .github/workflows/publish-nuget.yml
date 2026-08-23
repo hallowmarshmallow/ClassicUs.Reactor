@@ -21,10 +21,10 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: Restore
-        run: dotnet restore Manactor/Manactor.csproj
+        run: dotnet restore Reactor/Reactor.csproj
 
       - name: Pack
-        run: dotnet pack Manactor/Manactor.csproj -c Release -o ${{ github.workspace }}/nupkg
+        run: dotnet pack Reactor/Reactor.csproj -c Release -o ${{ github.workspace }}/nupkg
 
       - name: NuGet login (Trusted Publishing)
         uses: NuGet/login@v1

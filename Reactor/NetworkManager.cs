@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Hazel;
 
-namespace ClassicUs.Manactor
+namespace ClassicUs.Reactor
 {
     internal static class NetworkManager
     {
@@ -16,7 +16,7 @@ namespace ClassicUs.Manactor
 
         public static bool TryDispatch(PlayerControl sender, byte callId, MessageReader reader)
         {
-            ManactorRpc.EnsureFlushed();
+            ReactorRpc.EnsureFlushed();
             if (sender == null || sender.Data == null) return false;
 
             if (callId == RpcHandshake)
@@ -42,7 +42,7 @@ namespace ClassicUs.Manactor
                 writePayload?.Invoke(writer);
                 client.FinishRpcImmediately(writer);
             }
-            catch (Exception e) { ManactorPlugin.Log.LogError("SendRpc failed: " + e); }
+            catch (Exception e) { ReactorPlugin.Log.LogError("SendRpc failed: " + e); }
         }
 
         public static void SendHandshake()
@@ -51,14 +51,14 @@ namespace ClassicUs.Manactor
             var local = PlayerControl.LocalPlayer;
             if (client == null || local == null || local.Data == null) return;
 
-            var mods = new List<(string mod, string version)>(ManactorAPI.GetLocalMods());
+            var mods = new List<(string mod, string version)>(ReactorAPI.GetLocalMods());
             LobbyTracker.SetPlayerMods(local.Data.PlayerId, mods);
 
             try
             {
                 var writer = client.StartRpcImmediately(local.NetId, RpcHandshake, SendOption.Reliable, -1);
                 writer.Write(HandshakeProtocolVersion);
-                writer.Write(ManactorPlugin.Version);
+                writer.Write(ReactorPlugin.Version);
                 writer.Write((byte)mods.Count);
                 foreach (var (mod, version) in mods)
                 {
@@ -66,9 +66,9 @@ namespace ClassicUs.Manactor
                     writer.Write(version);
                 }
                 client.FinishRpcImmediately(writer);
-                ManactorPlugin.Log.LogDebug($"Handshake sent: protocol={HandshakeProtocolVersion}, mods={mods.Count}.");
+                ReactorPlugin.Log.LogDebug($"Handshake sent: protocol={HandshakeProtocolVersion}, mods={mods.Count}.");
             }
-            catch (Exception e) { ManactorPlugin.Log.LogError("SendHandshake failed: " + e); }
+            catch (Exception e) { ReactorPlugin.Log.LogError("SendHandshake failed: " + e); }
         }
 
         public static void HandleHandshake(byte senderId, MessageReader reader)
@@ -76,7 +76,7 @@ namespace ClassicUs.Manactor
             try
             {
                 byte protocol = reader.ReadByte();
-                string manactorVersion = reader.ReadString();
+                string reactorVersion = reader.ReadString();
                 byte count = reader.ReadByte();
                 if (count > MaxAdvertisedMods) throw new InvalidOperationException($"invalid mod count {count}");
 
@@ -92,18 +92,18 @@ namespace ClassicUs.Manactor
                 }
 
                 LobbyTracker.SetPlayerMods(senderId, mods);
-                ManactorAPI.FirePlayerModded(senderId, mods);
+                ReactorAPI.FirePlayerModded(senderId, mods);
 
-                bool compatible = protocol == HandshakeProtocolVersion && manactorVersion == ManactorPlugin.Version &&
-                                  LobbyTracker.HasExactModSet(mods, ManactorAPI.GetLocalMods());
+                bool compatible = protocol == HandshakeProtocolVersion && reactorVersion == ReactorPlugin.Version &&
+                                  LobbyTracker.HasExactModSet(mods, ReactorAPI.GetLocalMods());
                 KickTracker.ConfirmHandshake(senderId, compatible,
-                    compatible ? null : $"protocol={protocol}, Manactor={manactorVersion}, mod set mismatch");
+                    compatible ? null : $"protocol={protocol}, Reactor={reactorVersion}, mod set mismatch");
 
-                ManactorPlugin.Log.LogInfo($"Handshake from player {senderId}: protocol={protocol}, Manactor={manactorVersion}, mods={mods.Count}, compatible={compatible}.");
+                ReactorPlugin.Log.LogInfo($"Handshake from player {senderId}: protocol={protocol}, Reactor={reactorVersion}, mods={mods.Count}, compatible={compatible}.");
             }
             catch (Exception e)
             {
-                ManactorPlugin.Log.LogWarning($"Rejected malformed handshake from player {senderId}: {e.Message}");
+                ReactorPlugin.Log.LogWarning($"Rejected malformed handshake from player {senderId}: {e.Message}");
                 KickTracker.ConfirmHandshake(senderId, false, "malformed handshake");
             }
         }

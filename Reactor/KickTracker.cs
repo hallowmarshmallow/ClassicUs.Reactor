@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ClassicUs.Manactor
+namespace ClassicUs.Reactor
 {
     internal static class KickTracker
     {
@@ -13,7 +13,7 @@ namespace ClassicUs.Manactor
             var client = AmongUsClient.Instance;
             if (client == null || !client.AmHost || clientId == client.ClientId) return;
             _pendingClients[clientId] = Time.time + HandshakeTimeoutSeconds;
-            ManactorPlugin.Log.LogInfo($"[Handshake] Waiting for client {clientId}.");
+            ReactorPlugin.Log.LogInfo($"[Handshake] Waiting for client {clientId}.");
         }
 
         public static void Untrack(int clientId) => _pendingClients.Remove(clientId);
@@ -43,9 +43,9 @@ namespace ClassicUs.Manactor
             {
                 _pendingClients.Remove(clientId);
                 if (ShouldKick())
-                    Kick(clientId, "missing Manactor handshake");
+                    Kick(clientId, "missing Reactor handshake");
                 else
-                    ManactorPlugin.Log.LogInfo($"[Handshake] Client {clientId} has no Manactor; allowing join (compatibility enforcement disabled).");
+                    ReactorPlugin.Log.LogInfo($"[Handshake] Client {clientId} has no Reactor; allowing join (compatibility enforcement disabled).");
             }
         }
 
@@ -60,16 +60,16 @@ namespace ClassicUs.Manactor
         }
 
         private static bool ShouldKick() =>
-            ManactorPlugin.EnforceCompatibility?.Value == true;
+            ReactorPlugin.EnforceCompatibility?.Value == true;
 
         private static void Kick(int clientId, string reason)
         {
             var client = AmongUsClient.Instance;
             if (client == null || !client.AmHost || clientId == client.ClientId) return;
 
-            ManactorPlugin.Log.LogWarning($"[Handshake] Kicking client {clientId}: {reason}.");
+            ReactorPlugin.Log.LogWarning($"[Handshake] Kicking client {clientId}: {reason}.");
             try { client.KickPlayer(clientId, false); }
-            catch (System.Exception e) { ManactorPlugin.Log.LogError($"[Handshake] Kick failed for client {clientId}: {e}"); }
+            catch (System.Exception e) { ReactorPlugin.Log.LogError($"[Handshake] Kick failed for client {clientId}: {e}"); }
         }
     }
 }

@@ -1,7 +1,7 @@
 using System;
 using Il2CppInterop.Runtime.InteropTypes;
 
-namespace ClassicUs.Manactor
+namespace ClassicUs.Reactor
 {
     public static class Il2CppSafeCast
     {

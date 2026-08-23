@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace ClassicUs.Manactor
+namespace ClassicUs.Reactor
 {
     internal static class RpcIdAllocator
     {
@@ -16,7 +16,7 @@ namespace ClassicUs.Manactor
             if (string.IsNullOrEmpty(key)) return;
             if (_finalized != null)
             {
-                ManactorPlugin.Log.LogError($"[RpcIdAllocator] '{key}' reserved after ids were already finalized; it may not match other peers.");
+                ReactorPlugin.Log.LogError($"[RpcIdAllocator] '{key}' reserved after ids were already finalized; it may not match other peers.");
                 return;
             }
             if (!_pendingKeys.Contains(key)) _pendingKeys.Add(key);
@@ -27,7 +27,7 @@ namespace ClassicUs.Manactor
             if (_finalized == null) FinalizeIds();
             if (_finalized.TryGetValue(key, out var id)) return id;
 
-            ManactorPlugin.Log.LogError($"[RpcIdAllocator] '{key}' was never reserved.");
+            ReactorPlugin.Log.LogError($"[RpcIdAllocator] '{key}' was never reserved.");
             return 0;
         }
 
@@ -42,14 +42,14 @@ namespace ClassicUs.Manactor
             {
                 if (next > RangeEnd)
                 {
-                    ManactorPlugin.Log.LogError($"[RpcIdAllocator] Ran out of RPC id space, '{key}' was not assigned.");
+                    ReactorPlugin.Log.LogError($"[RpcIdAllocator] Ran out of RPC id space, '{key}' was not assigned.");
                     continue;
                 }
                 _finalized[key] = (byte)next;
                 next++;
             }
 
-            ManactorPlugin.Log.LogInfo("[RpcIdAllocator] Finalized RPC ids: " + string.Join(", ", _finalized.Keys));
+            ReactorPlugin.Log.LogInfo("[RpcIdAllocator] Finalized RPC ids: " + string.Join(", ", _finalized.Keys));
         }
     }
 }

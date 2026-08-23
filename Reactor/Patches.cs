@@ -4,7 +4,7 @@ using Hazel;
 using InnerNet;
 using UnityEngine;
 
-namespace ClassicUs.Manactor
+namespace ClassicUs.Reactor
 {
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
     internal static class PlayerControl_HandleRpc_Patch
@@ -15,7 +15,7 @@ namespace ClassicUs.Manactor
             {
                 if (NetworkManager.TryDispatch(__instance, callId, reader)) return false;
             }
-            catch (Exception e) { ManactorPlugin.Log.LogError("RPC dispatch failed: " + e); }
+            catch (Exception e) { ReactorPlugin.Log.LogError("RPC dispatch failed: " + e); }
             return true;
         }
     }
@@ -48,9 +48,9 @@ namespace ClassicUs.Manactor
             {
                 var pid = data.Character.Data.PlayerId;
                 LobbyTracker.RemovePlayer(pid);
-                ManactorAPI.FirePlayerUnmodded(pid);
+                ReactorAPI.FirePlayerUnmodded(pid);
             }
-            catch (Exception e) { ManactorPlugin.Log.LogError("OnPlayerLeft tracker: " + e); }
+            catch (Exception e) { ReactorPlugin.Log.LogError("OnPlayerLeft tracker: " + e); }
         }
     }
 
@@ -103,10 +103,10 @@ namespace ClassicUs.Manactor
             _checking = false;
             _fired = true;
 
-            if (!LobbyTracker.HostIsModded() && ManactorAPI.HasLocalMods())
+            if (!LobbyTracker.HostIsModded() && ReactorAPI.HasLocalMods())
             {
-                ManactorPlugin.Log.LogInfo("Host has no recorded Manactor handshake after the grace period — leaving unmodded lobby to avoid an unfair advantage.");
-                ManactorAPI.FireJoiningUnmoddedLobby();
+                ReactorPlugin.Log.LogInfo("Host has no recorded Reactor handshake after the grace period — leaving unmodded lobby to avoid an unfair advantage.");
+                ReactorAPI.FireJoiningUnmoddedLobby();
                 AmongUsClient.Instance?.ExitGame();
             }
         }
@@ -134,8 +134,8 @@ namespace ClassicUs.Manactor
     {
         private static void Postfix()
         {
-            try { ManactorAPI.FireGameStarted(); }
-            catch (Exception e) { ManactorPlugin.Log.LogError("OnGameStarted event: " + e); }
+            try { ReactorAPI.FireGameStarted(); }
+            catch (Exception e) { ReactorPlugin.Log.LogError("OnGameStarted event: " + e); }
         }
     }
 
@@ -146,8 +146,8 @@ namespace ClassicUs.Manactor
     {
         private static void Postfix()
         {
-            try { ManactorAPI.FireMeetingStarted(); }
-            catch (Exception e) { ManactorPlugin.Log.LogError("OnMeetingStarted event: " + e); }
+            try { ReactorAPI.FireMeetingStarted(); }
+            catch (Exception e) { ReactorPlugin.Log.LogError("OnMeetingStarted event: " + e); }
         }
     }
 
@@ -157,8 +157,8 @@ namespace ClassicUs.Manactor
         private static void Postfix(PlayerControl target)
         {
             if (target == null || target.Data == null) return;
-            try { ManactorAPI.FirePlayerDied(target.Data.PlayerId); }
-            catch (Exception e) { ManactorPlugin.Log.LogError("OnPlayerDied event: " + e); }
+            try { ReactorAPI.FirePlayerDied(target.Data.PlayerId); }
+            catch (Exception e) { ReactorPlugin.Log.LogError("OnPlayerDied event: " + e); }
         }
     }
 
@@ -168,8 +168,8 @@ namespace ClassicUs.Manactor
         private static void Postfix(RoleBehaviour __instance, PlayerControl player)
         {
             if (__instance == null || player == null || player.Data == null) return;
-            try { ManactorAPI.FireRoleAssigned(player.Data.PlayerId, __instance.GetType().Name); }
-            catch (Exception e) { ManactorPlugin.Log.LogError("OnRoleAssigned event: " + e); }
+            try { ReactorAPI.FireRoleAssigned(player.Data.PlayerId, __instance.GetType().Name); }
+            catch (Exception e) { ReactorPlugin.Log.LogError("OnRoleAssigned event: " + e); }
         }
     }
 
@@ -188,8 +188,8 @@ namespace ClassicUs.Manactor
         private static void Postfix(PlayerControl __instance)
         {
             if (__instance == null || __instance.Data == null) return;
-            try { ManactorAPI.FirePlayerDied(__instance.Data.PlayerId); }
-            catch (Exception e) { ManactorPlugin.Log.LogError("OnPlayerDied event: " + e); }
+            try { ReactorAPI.FirePlayerDied(__instance.Data.PlayerId); }
+            catch (Exception e) { ReactorPlugin.Log.LogError("OnPlayerDied event: " + e); }
         }
     }
 }
