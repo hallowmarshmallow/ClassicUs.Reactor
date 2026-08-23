@@ -6,17 +6,19 @@ using UnityEngine;
 
 namespace ClassicUs.Reactor
 {
+    // NOTE: HandleRpc is a virtual method on PlayerControl. On IL2CPP, returning
+    // false from a Prefix (to skip the original method) requires precise stack-frame
+    // manipulation that can segfault on Linux when the vtable layout differs between
+    // game versions. Instead we always let the original run — Reactor's custom RPC ids
+    // (handshake=211, allocated from 40) do not conflict with Among Us built-in RPCs,
+    // so the original handler simply ignores them as unknown call ids.
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
     internal static class PlayerControl_HandleRpc_Patch
     {
-        private static bool Prefix(PlayerControl __instance, byte callId, MessageReader reader)
+        private static void Prefix(PlayerControl __instance, byte callId, MessageReader reader)
         {
-            try
-            {
-                if (NetworkManager.TryDispatch(__instance, callId, reader)) return false;
-            }
+            try { NetworkManager.TryDispatch(__instance, callId, reader); }
             catch (Exception e) { ReactorPlugin.Log.LogError("RPC dispatch failed: " + e); }
-            return true;
         }
     }
 
